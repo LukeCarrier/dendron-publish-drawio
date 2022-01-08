@@ -1,0 +1,32 @@
+{
+  "name": "dendron-publish-drawio",
+  "version": "1.0.0",
+  "description": "Export Draw.io diagrams embedded in a published Dendron site to SVG",
+  "bin": {
+    "dendron-publish-drawio": "./bin/dendron-publish-drawio.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukeCarrier/dendron-publish-drawio.git"
+  },
+  "keywords": [
+    "dendron",
+    "drawio",
+    "pkm",
+    "diagram",
+    "embed",
+    "publish"
+  ],
+  "author": "Luke Carrier <luke@carrier.im>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/LukeCarrier/dendron-publish-drawio/issues"
+  },
+  "homepage": "https://github.com/LukeCarrier/dendron-publish-drawio#readme",
+  "dependencies": {
+    "drawio-export-puppeteer": "^0.2.0"
+  }
+}
