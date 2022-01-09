@@ -1,4 +1,4 @@
-# Export Diagrams.met diagrams during Dendron site publishing
+# Export Diagrams.net diagrams during Dendron site publishing
 
 Node module for exporting [Diagrams.net (Draw.io)](https://about.diagrams.net/) diagrams embedded in a published [Dendron](https://dendron.so/) site to SVG.
 
