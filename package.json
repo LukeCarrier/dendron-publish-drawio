@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/LukeCarrier/dendron-publish-drawio#readme",
   "dependencies": {
-    "drawio-export-puppeteer": "^0.2.0"
+    "drawio-export-puppeteer": "^0.2.0",
+    "glob-promise": "^4.2.2"
   }
 }
