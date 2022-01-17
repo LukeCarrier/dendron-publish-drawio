@@ -6,6 +6,8 @@ const process = require("process");
 const glob = require("glob-promise");
 const { exportDiagram } = require("drawio-export-puppeteer");
 
+const ISSUES_URL = "https://github.com/LukeCarrier/dendron-publish-drawio/issues";
+
 // Matches src="some/file.drawio" and src="some/file.drawio#42"
 const DIAGRAM_SRC_RE = /src="(?<filename>[a-zA-Z0-9\/\.]+\.drawio)(#(?<pageIndex>[0-9]+))?"/g;
 
@@ -58,7 +60,8 @@ async function main() {
     }
     console.info(`Exported ${embeddedDiagrams.size} diagram(s) to SVG`);
   } catch (err) {
-    console.error(err);
+    console.error(`${process.argv0}: encountered an unhandled error:`, err);
+    console.error(`Please report this error at ${ISSUES_URL}`);
   }
 }
 
