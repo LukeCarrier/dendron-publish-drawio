@@ -29,5 +29,8 @@
   "dependencies": {
     "drawio-export-puppeteer": "^0.2.0",
     "glob-promise": "^4.2.2"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7"
   }
 }
