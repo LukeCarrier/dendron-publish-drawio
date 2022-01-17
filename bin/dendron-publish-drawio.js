@@ -30,6 +30,18 @@ const embeddedDiagrams = new Set();
 
 async function main() {
   try {
+    const rootDir = await fs.stat(ROOT);
+    assert(rootDir.isDirectory());
+  } catch (e) {
+    console.error([
+      `Couldn't find the nextjs-template directory at ${ROOT}; make sure`,
+      "you're running the command from the top of your Dendron workspace, and",
+      "that you've run dendron publish init.",
+    ].join(" "));
+    process.exit(1);
+  }
+
+  try {
     let numRewrites = 0;
     for (const noteGlob of noteGlobs) {
       const noteFiles = await glob(path.join(ROOT, noteGlob));
