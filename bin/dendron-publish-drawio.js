@@ -62,6 +62,7 @@ async function main() {
   } catch (err) {
     console.error(`${process.argv0}: encountered an unhandled error:`, err);
     console.error(`Please report this error at ${ISSUES_URL}`);
+    process.exit(1);
   }
 }
 
