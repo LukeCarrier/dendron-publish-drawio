@@ -19,7 +19,7 @@ const ROOT = path.join(process.cwd(), ".next");
 // Glob patterns to match all files in the .next/ directory derived from our
 // notes. Any img elements with *.drawio files as their sources will be exported
 // to SVG, and these references rewritten.
-const noteGlobs = [
+const NOTE_GLOBS = [
   "{,public/}data/fuse.json",
   "{,public/}data/notes/*.{html,md}",
 ];
@@ -43,7 +43,7 @@ async function main() {
 
   try {
     let numRewrites = 0;
-    for (const noteGlob of noteGlobs) {
+    for (const noteGlob of NOTE_GLOBS) {
       const noteFiles = await glob(path.join(ROOT, noteGlob));
       for (const noteFile of noteFiles) {
         let contents = await fs.readFile(noteFile, FILE_ENCODING);
