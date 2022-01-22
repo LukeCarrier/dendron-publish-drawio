@@ -5,15 +5,14 @@ const process = require("process");
 
 const { exportDiagram } = require("drawio-export-puppeteer");
 
+const Counter = require("../lib/counter");
 const {
   getPublishedNoteFiles,
   isDendronWorkspaceWithNextjsTemplate,
 } = require("../lib/dendron-nextjs-template");
+const { rewriteDrawioDiagramSrcs } = require("../lib/dendron-note");
 
 const ISSUES_URL = "https://github.com/LukeCarrier/dendron-publish-drawio/issues";
-
-// Matches src="some/file.drawio" and src="some/file.drawio#42"
-const DIAGRAM_SRC_RE = /src="(?<filename>[a-zA-Z0-9\/\.]+\.drawio)(#(?<pageIndex>[0-9]+))?"/g;
 
 const FILE_ENCODING = "utf8";
 
@@ -36,24 +35,17 @@ async function main() {
   }
 
   try {
-    let numRewrites = 0;
+    let numFiles = new Counter();
+    let numRefs = new Counter();
     const noteFileGenerator = getPublishedNoteFiles(templatePath);
-    for await (const noteFile of noteFileGenerator) {
-      let contents = await fs.readFile(noteFile, FILE_ENCODING);
-      let numMatches = 0;
-      for (const match of contents.matchAll(DIAGRAM_SRC_RE)) {
-        numMatches++;
-        embeddedDiagrams.add([match.groups.filename, match.groups.pageIndex || 0]);
-      }
-
-      if (numMatches > 0) {
-        numRewrites++;
-        console.debug(`Rewriting ${numMatches} src attribute(s) in note file ${noteFile}`);
-        contents = contents.replaceAll(DIAGRAM_SRC_RE, "src=\"../../$<filename>-$<pageIndex>.svg\"");
-        await fs.writeFile(noteFile, contents, FILE_ENCODING);
+    for await (const notePath of noteFileGenerator) {
+      const diagramSrcGenerator = rewriteDrawioDiagramSrcs(notePath, numFiles);
+      for await (const diagramRef of diagramSrcGenerator) {
+        numRefs.count();
+        embeddedDiagrams.add(diagramRef);
       }
     }
-    console.info(`Rewrote ${numRewrites} note file(s)`);
+    console.info(`Rewrote ${numRefs.total} references to ${embeddedDiagrams.size} diagrams in ${numFiles.total} note file(s)`);
 
     for (const [filename, pageIndex] of embeddedDiagrams.values()) {
       const destFilename = `${filename}-${pageIndex}.svg`;
