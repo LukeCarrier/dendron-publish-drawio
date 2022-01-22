@@ -1,6 +1,6 @@
 {
   "name": "dendron-publish-drawio",
-  "version": "1.0.0",
+  "version": "2.0.0-rc0",
   "description": "Export Draw.io diagrams embedded in a published Dendron site to SVG",
   "bin": {
     "dendron-publish-drawio": "./bin/dendron-publish-drawio.js"
