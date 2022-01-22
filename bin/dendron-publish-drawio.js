@@ -3,10 +3,12 @@ const fs = require("fs").promises;
 const path = require("path");
 const process = require("process");
 
-const glob = require("glob-promise");
 const { exportDiagram } = require("drawio-export-puppeteer");
 
-const { isDendronWorkspaceWithNextjsTemplate } = require("../lib/dendron-nextjs-template");
+const {
+  getPublishedNoteFiles,
+  isDendronWorkspaceWithNextjsTemplate,
+} = require("../lib/dendron-nextjs-template");
 
 const ISSUES_URL = "https://github.com/LukeCarrier/dendron-publish-drawio/issues";
 
@@ -17,14 +19,6 @@ const FILE_ENCODING = "utf8";
 
 // Root of the .next directory.
 const WORKSPACE = process.cwd();
-
-// Glob patterns to match all files in the .next/ directory derived from our
-// notes. Any img elements with *.drawio files as their sources will be exported
-// to SVG, and these references rewritten.
-const NOTE_GLOBS = [
-  "{,public/}data/fuse.json",
-  "{,public/}data/notes/*.{html,md}",
-];
 
 // Set of (filename, pageIndex, outputAssetName) tuples that need exporting to
 // SVG, as referenced in notes.
@@ -43,22 +37,20 @@ async function main() {
 
   try {
     let numRewrites = 0;
-    for (const noteGlob of NOTE_GLOBS) {
-      const noteFiles = await glob(path.join(templatePath, noteGlob));
-      for (const noteFile of noteFiles) {
-        let contents = await fs.readFile(noteFile, FILE_ENCODING);
-        let numMatches = 0;
-        for (const match of contents.matchAll(DIAGRAM_SRC_RE)) {
-          numMatches++;
-          embeddedDiagrams.add([match.groups.filename, match.groups.pageIndex || 0]);
-        }
+    const noteFileGenerator = getPublishedNoteFiles(templatePath);
+    for await (const noteFile of noteFileGenerator) {
+      let contents = await fs.readFile(noteFile, FILE_ENCODING);
+      let numMatches = 0;
+      for (const match of contents.matchAll(DIAGRAM_SRC_RE)) {
+        numMatches++;
+        embeddedDiagrams.add([match.groups.filename, match.groups.pageIndex || 0]);
+      }
 
-        if (numMatches > 0) {
-          numRewrites++;
-          console.debug(`Rewriting ${numMatches} src attribute(s) in note file ${noteFile}`);
-          contents = contents.replaceAll(DIAGRAM_SRC_RE, "src=\"../../$<filename>-$<pageIndex>.svg\"");
-          await fs.writeFile(noteFile, contents, FILE_ENCODING);
-        }
+      if (numMatches > 0) {
+        numRewrites++;
+        console.debug(`Rewriting ${numMatches} src attribute(s) in note file ${noteFile}`);
+        contents = contents.replaceAll(DIAGRAM_SRC_RE, "src=\"../../$<filename>-$<pageIndex>.svg\"");
+        await fs.writeFile(noteFile, contents, FILE_ENCODING);
       }
     }
     console.info(`Rewrote ${numRewrites} note file(s)`);
