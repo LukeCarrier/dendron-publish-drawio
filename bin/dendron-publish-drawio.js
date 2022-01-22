@@ -19,6 +19,9 @@ const FILE_ENCODING = "utf8";
 // Root of the .next directory.
 const WORKSPACE = process.cwd();
 
+// Dendron assetsPrefix value.
+const ASSETS_PREFIX = process.env.DENDRON_ASSETS_PREFIX || "";
+
 // Set of (filename, pageIndex, outputAssetName) tuples that need exporting to
 // SVG, as referenced in notes.
 const embeddedDiagrams = new Set();
@@ -39,7 +42,7 @@ async function main() {
     let numRefs = new Counter();
     const noteFileGenerator = getPublishedNoteFiles(templatePath);
     for await (const notePath of noteFileGenerator) {
-      const diagramSrcGenerator = rewriteDrawioDiagramSrcs(notePath, numFiles);
+      const diagramSrcGenerator = rewriteDrawioDiagramSrcs(notePath, ASSETS_PREFIX, numFiles);
       for await (const diagramRef of diagramSrcGenerator) {
         numRefs.count();
         embeddedDiagrams.add(diagramRef);
