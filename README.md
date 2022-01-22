@@ -44,3 +44,9 @@ npx dendron-publish-drawio
 cd .next/
 npm run export
 ```
+
+Note that if you customise Dendron's [`site:assetsPrefix`](https://wiki.dendron.so/notes/f2ed8639-a604-4a9d-b76c-41e205fb8713/#assetsprefix) option (or set it via `--overrides=assetsPrefix=...`) you'll need to set the `DENDRON_ASSETS_PREFIX` environment variable to the same value when running `dendron-publish-drawio`:
+
+```console
+export DENDRON_ASSETS_PREFIX=/etc npx dendron-publish-drawio
+```
