@@ -6,6 +6,7 @@ const process = require("process");
 const { exportDiagram } = require("drawio-export-puppeteer");
 
 const Counter = require("../lib/counter");
+const DiagramSet = require("../lib/diagram-set");
 const {
   getPublishedNoteFiles,
   isDendronWorkspaceWithNextjsTemplate,
@@ -22,9 +23,8 @@ const WORKSPACE = process.cwd();
 // Dendron assetsPrefix value.
 const ASSETS_PREFIX = process.env.DENDRON_ASSETS_PREFIX || "";
 
-// Set of (filename, pageIndex, outputAssetName) tuples that need exporting to
-// SVG, as referenced in notes.
-const embeddedDiagrams = new Set();
+// Object mapping *.drawio files to sets of page indices.
+const embeddedDiagrams = new DiagramSet();
 
 async function main() {
   const templatePath = await isDendronWorkspaceWithNextjsTemplate(WORKSPACE);
@@ -45,17 +45,20 @@ async function main() {
       const diagramSrcGenerator = rewriteDrawioDiagramSrcs(notePath, ASSETS_PREFIX, numFiles);
       for await (const diagramRef of diagramSrcGenerator) {
         numRefs.count();
-        embeddedDiagrams.add(diagramRef);
+        embeddedDiagrams.add(...diagramRef);
       }
     }
     console.info(`Rewrote ${numRefs.total} references to ${embeddedDiagrams.size} diagrams in ${numFiles.total} note file(s)`);
 
-    for (const [filename, pageIndex] of embeddedDiagrams.values()) {
-      const destFilename = `${filename}-${pageIndex}.svg`;
-      console.log(`Exporting ${filename}#${pageIndex} to ${destFilename}`);
+    for (const [filename, pageIndices] of embeddedDiagrams) {
       const contents = await fs.readFile(path.join(templatePath, "public", filename), FILE_ENCODING);
-      const svg = await exportDiagram(contents, pageIndex, "svg");
-      await fs.writeFile(path.join(templatePath, "public", destFilename), svg, FILE_ENCODING);
+
+      for (const pageIndex of pageIndices) {
+        const destFilename = `${filename}-${pageIndex}.svg`;
+        console.log(`Exporting ${filename}#${pageIndex} to ${destFilename}`);
+        const svg = await exportDiagram(contents, pageIndex, "svg");
+        await fs.writeFile(path.join(templatePath, "public", destFilename), svg, FILE_ENCODING);
+      }
     }
     console.info(`Exported ${embeddedDiagrams.size} diagram(s) to SVG`);
   } catch (err) {
